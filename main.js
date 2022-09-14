@@ -17,13 +17,6 @@ let selector = {
     spriteArray: []
 };
 
-class tile{
-    constructor(id,rotate){
-        this.id = id;
-        this.rotate = rotate;
-    };
-};
-
 const s = ( p ) => {
 
     p.setup = function() {
@@ -59,9 +52,36 @@ const s = ( p ) => {
             let tileY = Math.floor(p.mouseY / selector.tileSize);
             selected.id = tileY*16 + tileX;
             selected.fg = p.keyIsDown(p.SHIFT);
-    }
-  };
+        }
+    };
+    p.keyPressed = function() {
+        if (p.key === "s") exportFile();
+    };
 };
+
+function exportFile(){
+    let parsedData = `${tileX},${tileY}\n`
+    bgLevelArray.forEach((arr) => parsedData += arr.join(","))
+    parsedData += "\n"
+    fgLevelArray.forEach((arr) => parsedData += arr.join(","))
+
+    saveFile("level.ptlt", parsedData);
+};
+
+function saveFile(filename, data) {
+    const blob = new Blob([data], {type: 'text/csv'});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, filename);
+    }
+    else{
+        const elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;        
+        document.body.appendChild(elem);
+        elem.click();        
+        document.body.removeChild(elem);
+    }
+}
 
 function startEditor(){
     spriteSheetURL = loadImageURL("spriteSheet");
@@ -147,7 +167,6 @@ function editLevel(p){
     } else {
         fgLevelArray[tileX][tileY] = selected.id;
     }
-
 };
 
 function drawEditedLevel(p,levelArray){
