@@ -2,8 +2,9 @@ let spriteSheetURL;
 let spriteSheet;
 let spriteSize;
 let levelSize = {x:0,y:0};
-let selected = 1;
-let levelArray = [];
+let selected = {id: 1, fg: false};
+let bgLevelArray = [];
+let fgLevelArray = [];
 
 let drawSpace = {
     tileSize: null,
@@ -16,6 +17,13 @@ let selector = {
     spriteArray: []
 };
 
+class tile{
+    constructor(id,rotate){
+        this.id = id;
+        this.rotate = rotate;
+    };
+};
+
 const s = ( p ) => {
 
     p.setup = function() {
@@ -24,7 +32,6 @@ const s = ( p ) => {
       drawSpace.tileSize = ((p.displayWidth-selector.width-18)/levelSize.x);
 
       selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,255);
-
       drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,255);
 
     };
@@ -37,7 +44,8 @@ const s = ( p ) => {
       drawSelectRect(p);
       editLevel(p);
       drawGrid(p);
-      drawEditedLevel(p);
+      drawEditedLevel(p,bgLevelArray);
+      drawEditedLevel(p,fgLevelArray);
     };
 
     p.preload = function() {
@@ -49,7 +57,8 @@ const s = ( p ) => {
         if (p.mouseX < selector.width){
             let tileX = Math.floor(p.mouseX / selector.tileSize);
             let tileY = Math.floor(p.mouseY / selector.tileSize);
-            selected = tileY*16 + tileX;
+            selected.id = tileY*16 + tileX;
+            selected.fg = p.keyIsDown(p.SHIFT);
     }
   };
 };
@@ -89,7 +98,8 @@ function initLevelArray(){
         for (let j=0; j<levelSize.y; j++){
             yArray.push(-1);
         }
-        levelArray.push(yArray);
+        bgLevelArray.push([...yArray]);
+        fgLevelArray.push([...yArray]);
     };
 };
 
@@ -117,10 +127,10 @@ function drawSelectTiles(p){
 };
 
 function drawSelectRect(p){
-    let y = (Math.floor(selected/16))*selector.tileSize;
-    let x = (selected%16)*selector.tileSize;
+    let y = (Math.floor(selected.id/16))*selector.tileSize;
+    let x = (selected.id%16)*selector.tileSize;
     p.noFill();
-    p.stroke('blue');
+    p.stroke(selected.fg?'red':'blue');
     p.strokeWeight(3);
     p.rect(x,y,25,25);
     p.stroke(0);
@@ -130,14 +140,17 @@ function drawSelectRect(p){
 
 function editLevel(p){
     if (!(p.mouseIsPressed) || (p.mouseX < selector.width)) return;
-    console.log('clicking')
     let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
     let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
-    console.log(tileX, tileY, selected)
-    levelArray[tileX][tileY] = selected;
+    if (!selected.fg){
+        bgLevelArray[tileX][tileY] = selected.id;
+    } else {
+        fgLevelArray[tileX][tileY] = selected.id;
+    }
+
 };
 
-function drawEditedLevel(p){
+function drawEditedLevel(p,levelArray){
     for (let i=0; i<levelArray.length; i++){
         for (let j=0; j<levelArray[0].length; j++){
             if (levelArray[i][j] != -1){
