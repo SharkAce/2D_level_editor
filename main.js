@@ -2,7 +2,7 @@ let spriteSheetURL;
 let spriteSheet;
 let spriteSize;
 let levelSize = {x:0,y:0};
-let selected = {id: 1, fg: false};
+let selected = {id: 1, fg: false, rotation: 0};
 let bgLevelArray = [];
 let fgLevelArray = [];
 
@@ -17,10 +17,22 @@ let selector = {
     spriteArray: []
 };
 
+class Tile {
+    constructor (id, rotation){
+        this.id = id;
+        this.rotation = rotation;
+        this.selected = "id"
+    };
+    toString() {
+        return this[this.selected];
+    }
+};
+
 const s = ( p ) => {
 
     p.setup = function() {
       p.createCanvas(p.displayWidth, p.displayHeight);
+      p.angleMode(p.DEGREES);
       
       drawSpace.tileSize = ((p.displayWidth-selector.width-18)/levelSize.x);
 
@@ -39,6 +51,7 @@ const s = ( p ) => {
       drawGrid(p);
       drawEditedLevel(p,bgLevelArray);
       drawEditedLevel(p,fgLevelArray);
+      drawInfo(p);
     };
 
     p.preload = function() {
@@ -56,16 +69,42 @@ const s = ( p ) => {
     };
     p.keyPressed = function() {
         if (p.key === "s") exportFile();
+        else if (p.key === "r") selected.rotation = (selected.rotation == 3 ? 0 : selected.rotation + 1);
+        else if (p.key === "d") selected.id = -1
     };
 };
 
+function drawInfo(p){
+    p.fill(0);
+    p.text(`rotation: ${selected.rotation*90}`,5,500);
+    p.text(`delete mode: ${selected.id == -1}`,5,515);
+    p.text("keys:",5,540);
+    p.text("r: rotate", 25,555);
+    p.text("d: delete mode", 25,570);
+    p.text("s: save", 25, 585);
+    p.text("Shift: select foreground", 25, 600);
+    p.fill(255);
+};
+
 function exportFile(){
-    let parsedData = `${tileX},${tileY}\n`
-    bgLevelArray.forEach((arr) => parsedData += arr.join(","))
-    parsedData += "\n"
-    fgLevelArray.forEach((arr) => parsedData += arr.join(","))
+    let parsedData = `${levelSize.x},${levelSize.y}`
+    
+    parsedData += encodeLine(bgLevelArray, "id");
+    parsedData += encodeLine(bgLevelArray, "rotation");
+    parsedData += encodeLine(fgLevelArray, "id");
+    parsedData += encodeLine(fgLevelArray, "rotation");
 
     saveFile("level.ptlt", parsedData);
+};
+
+function encodeLine(levelArray, selected) {
+    let parsedData = ""
+    parsedData += "\n"
+    levelArray.forEach((arr) => arr.forEach((obj) => obj.selected = selected));
+    levelArray.forEach((arr) => {parsedData += arr.join(",") ; parsedData += ","});
+    parsedData = parsedData.slice(0,-1);
+    return parsedData;
+
 };
 
 function saveFile(filename, data) {
@@ -88,7 +127,8 @@ function startEditor(){
     levelSize.x = parseInt(document.getElementById("levelX").value);
     levelSize.y = parseInt(document.getElementById("levelY").value);
     spriteSize = parseInt(document.getElementById("spriteSize").value);
-    initLevelArray();
+    bgLevelArray = initLevelArray();
+    fgLevelArray = initLevelArray();
     let myp5 = new p5(s);
     document.getElementById("initForm").remove();
   
@@ -113,14 +153,15 @@ function loadSpriteArray(image,tileSize,imageX,imageY){
 };
 
 function initLevelArray(){
+    let levelArray = [];
     for (let i=0; i<levelSize.x; i++){
         yArray = [];
         for (let j=0; j<levelSize.y; j++){
-            yArray.push(-1);
+            yArray.push(new Tile(-1,0));
         }
-        bgLevelArray.push([...yArray]);
-        fgLevelArray.push([...yArray]);
+        levelArray.push([...yArray]);
     };
+    return levelArray;
 };
 
 function drawGrid(p){
@@ -162,19 +203,41 @@ function editLevel(p){
     if (!(p.mouseIsPressed) || (p.mouseX < selector.width)) return;
     let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
     let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
+
+    if (selected.id == -1){
+        bgLevelArray[tileX][tileY].id = -1;
+        bgLevelArray[tileX][tileY].rotation = 0;
+        fgLevelArray[tileX][tileY].id = -1;
+        fgLevelArray[tileX][tileY].rotation = 0;
+        return
+    }
+
     if (!selected.fg){
-        bgLevelArray[tileX][tileY] = selected.id;
+        bgLevelArray[tileX][tileY].id = selected.id;
+        bgLevelArray[tileX][tileY].rotation = selected.rotation;
     } else {
-        fgLevelArray[tileX][tileY] = selected.id;
+        fgLevelArray[tileX][tileY].id = selected.id;
+        fgLevelArray[tileX][tileY].rotation = selected.rotation;
     }
 };
 
 function drawEditedLevel(p,levelArray){
+    p.imageMode(p.CENTER);
     for (let i=0; i<levelArray.length; i++){
         for (let j=0; j<levelArray[0].length; j++){
-            if (levelArray[i][j] != -1){
-                p.image(drawSpace.spriteArray[(levelArray[i][j])],(i*drawSpace.tileSize)+selector.width,j*drawSpace.tileSize);
+            if (levelArray[i][j].id != -1){
+                let x = (i*drawSpace.tileSize)+selector.width+(drawSpace.tileSize/2);
+                let y = j*drawSpace.tileSize+(drawSpace.tileSize/2);
+                let rotate = levelArray[i][j].rotation*90;
+
+                p.translate(x,y);
+                p.rotate(rotate);
+                p.image(drawSpace.spriteArray[(levelArray[i][j].id)],0,0,drawSpace.tileSize,drawSpace.tileSize);
+                p.rotate(-1*rotate);
+                p.translate(-1*x,-1*y);
             }
         }
     };
+    p.rotate(0);
+    p.imageMode(p.CORNER);
 };
