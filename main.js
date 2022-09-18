@@ -117,7 +117,6 @@ selector.click = function(p){
             };
         };
     } else {
-        //change 16 to spriteSheetWidth / spriteSize
         selected.id = tileY*(spriteSheet.width/spriteSize) + tileX;
         selector.multiSelectedPos = [];
         selected.multiSelectedIds = [];
@@ -302,6 +301,7 @@ function drawGrid(p){
 
 function drawSelectTiles(p){
     let i=0;
+    //spriteSheet width and height might be reversed, needs further testing
     for (let y=0;y<(selector.spriteArray.length/(spriteSheet.width/spriteSize));y++){
         for (let x=0;x<(spriteSheet.height/spriteSize);x++){
             p.image(selector.spriteArray[i],x*selector.tileSize,y*selector.tileSize);
@@ -311,19 +311,18 @@ function drawSelectTiles(p){
 };
 
 function drawSelectRect(p){
-    //fix magic numbers
     p.noFill();
     p.stroke(selected.fg?'red':'blue');
     p.strokeWeight(3);
 
     if (selected.isMulti){
-        let y = (Math.floor(selected.multiSelectedIds[0]/16))*selector.tileSize;
-        let x = (selected.multiSelectedIds[0]%16)*selector.tileSize;
-        p.rect(x,y,(selected.multiSelectedWidth+1)*25,(selected.multiSelectedHeight+1)*25);
+        let y = (Math.floor(selected.multiSelectedIds[0]/(spriteSheet.width/spriteSize)))*selector.tileSize;
+        let x = (selected.multiSelectedIds[0]%(spriteSheet.width/spriteSize))*selector.tileSize;
+        p.rect(x,y,(selected.multiSelectedWidth+1)*selector.tileSize,(selected.multiSelectedHeight+1)*selector.tileSize);
     } else {
-        let y = (Math.floor(selected.id/16))*selector.tileSize;
-        let x = (selected.id%16)*selector.tileSize;
-        p.rect(x,y,25,25);
+        let y = (Math.floor(selected.id/(spriteSheet.width/spriteSize)))*selector.tileSize;
+        let x = (selected.id%(spriteSheet.width/spriteSize))*selector.tileSize;
+        p.rect(x,y,selector.tileSize,selector.tileSize);
     }
 
     p.stroke(0);
@@ -342,7 +341,7 @@ drawSpace.editLevelSingle = function (p){
 };
 
 drawSpace.editLevelMulti = function (startTile, endTile){
-    //might implement support for both multi select in both selector and drawSpace later
+    //might implement support for both multi select in both selector and drawSpace at the same time later
     if (selected.isMulti) return;
 
     for (let i=startTile.x; i<=endTile.x; i++){
