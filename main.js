@@ -287,9 +287,9 @@ function loadSpriteArray(image,tileSize,imageX,imageY){
 
 function initLevelArray(fillValue){
     let levelArray = [];
-    for (let i=0; i<levelSize.x; i++){
+    for (let i=0; i<levelSize.y; i++){
         yArray = [];
-        for (let j=0; j<levelSize.y; j++){
+        for (let j=0; j<levelSize.x; j++){
             yArray.push(new Tile(fillValue,0));
         }
         levelArray.push([...yArray]);
@@ -367,23 +367,23 @@ drawSpace.editLevelMulti = function (startTile, endTile){
 
 drawSpace.editTile = function (tileX, tileY){
     if (selected.collisionMode){
-        collisionLevelArray[tileX][tileY] = 1;
+        collisionLevelArray[tileY][tileX] = 1;
     }
 
     else if (selected.id == -1){
-        bgLevelArray[tileX][tileY].id = -1;
-        bgLevelArray[tileX][tileY].rotation = 0;
-        fgLevelArray[tileX][tileY].id = -1;
-        fgLevelArray[tileX][tileY].rotation = 0;
-        collisionLevelArray[tileX][tileY] = 0;
+        bgLevelArray[tileY][tileX].id = -1;
+        bgLevelArray[tileY][tileX].rotation = 0;
+        fgLevelArray[tileY][tileX].id = -1;
+        fgLevelArray[tileY][tileX].rotation = 0;
+        collisionLevelArray[tileY][tileX] = 0;
     } else {
 
         if (!selected.fg){
-            bgLevelArray[tileX][tileY].id = selected.id;
-            bgLevelArray[tileX][tileY].rotation = selected.rotation;
+            bgLevelArray[tileY][tileX].id = selected.id;
+            bgLevelArray[tileY][tileX].rotation = selected.rotation;
         } else {
-            fgLevelArray[tileX][tileY].id = selected.id;
-            fgLevelArray[tileX][tileY].rotation = selected.rotation;
+            fgLevelArray[tileY][tileX].id = selected.id;
+            fgLevelArray[tileY][tileX].rotation = selected.rotation;
         }
 
     }
@@ -394,8 +394,8 @@ function drawEditedLevel(p,levelArray){
     for (let i=0; i<levelArray.length; i++){
         for (let j=0; j<levelArray[0].length; j++){
             if (levelArray[i][j].id != -1){
-                let x = (i*drawSpace.tileSize)+selector.width+(drawSpace.tileSize/2);
-                let y = j*drawSpace.tileSize+(drawSpace.tileSize/2);
+                let x = (j*drawSpace.tileSize)+selector.width+(drawSpace.tileSize/2);
+                let y = i*drawSpace.tileSize+(drawSpace.tileSize/2);
                 let rotate = levelArray[i][j].rotation*90;
 
                 p.translate(x,y);
