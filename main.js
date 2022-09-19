@@ -415,8 +415,8 @@ function drawCollisions(p){
         for (let j=0; j<collisionLevelArray[0].length; j++){
             if (collisionLevelArray[i][j] == 1) p.text(
                 "c",
-                (i*drawSpace.tileSize)+selector.width+(drawSpace.tileSize/2),
-                j*drawSpace.tileSize+(drawSpace.tileSize/2)
+                (j*drawSpace.tileSize)+selector.width+(drawSpace.tileSize/2),
+                i*drawSpace.tileSize+(drawSpace.tileSize/2)
             )
         }
     }
