@@ -54,7 +54,7 @@ const s = ( p ) => {
       p.createCanvas(p.displayWidth, p.displayHeight);
       p.angleMode(p.DEGREES);
 
-      drawSpace.tileSize = ((p.displayWidth-selector.width-18)/levelSize.x);
+      drawSpace.tileSize = ((p.displayWidth-selector.width)/levelSize.x);
 
       selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,255);
       drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,255);
