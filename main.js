@@ -17,6 +17,8 @@ let bgLevelArray = [];
 let fgLevelArray = [];
 let collisionLevelArray = [];
 
+let levelFileReader = new FileReader()
+
 let drawSpace = {
     tileSize: null,
     spriteArray: [],
@@ -252,25 +254,50 @@ function saveFile(filename, data) {
         elem.click();        
         document.body.removeChild(elem);
     }
+};
+
+function parseLevelFile(levelFileStr){
+    let lineArr = levelFileStr.split('\n');
+    let intArr = []
+    lineArr.forEach(line => intArr.push(line.split(',')));
+
+    console.log(intArr)
+
+    for (let i=0; i<levelSize.x*levelSize.y;i++){
+        bgLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x].id = intArr[1][i];
+        bgLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x].rotation = intArr[2][i];
+        fgLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x].id = intArr[3][i];
+        fgLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x].rotation = intArr[4][i];
+        collisionLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x] = intArr[5][i];
+    }
+    
+};
+
+function updateLevelFile(){
+    if (document.getElementById("levelFile").value != ""){
+        levelFileReader.readAsBinaryString(document.getElementById("levelFile").files[0])
+    }
 }
 
 function startEditor(){
-    spriteSheetURL = loadImageURL("spriteSheet");
+    spriteSheetURL = loadURL("spriteSheet");
     levelSize.x = parseInt(document.getElementById("levelX").value);
     levelSize.y = parseInt(document.getElementById("levelY").value);
     spriteSize = parseInt(document.getElementById("spriteSize").value);
     bgLevelArray = initLevelArray(-1);
     fgLevelArray = initLevelArray(-1);
-    collisionLevelArray = initLevelArray(0);
+    collisionLevelArray = initCollisionArray();
     let myp5 = new p5(s);
+
+    parseLevelFile(levelFileReader.result)
     document.getElementById("initForm").remove();
   
 };
 
-function loadImageURL(imageElementId){
-    const selectedFile = document.getElementById(imageElementId);
-    const myImageFile = selectedFile.files[0];
-    return URL.createObjectURL(myImageFile);
+function loadURL(elementId){
+    const selectedFile = document.getElementById(elementId);
+    const myFile = selectedFile.files[0];
+    return URL.createObjectURL(myFile);
 
 };
 
@@ -296,6 +323,18 @@ function initLevelArray(fillValue){
     };
     return levelArray;
 };
+
+function initCollisionArray(){
+    let levelArray = [];
+    for (let i=0; i<levelSize.y; i++){
+        yArray = [];
+        for (let j=0; j<levelSize.x; j++){
+            yArray.push(0);
+        }
+        levelArray.push([...yArray]);
+    };
+    return levelArray;
+}
 
 function drawGrid(p){
 
