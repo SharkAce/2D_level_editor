@@ -409,6 +409,7 @@ drawSpace.editLevelMulti = function (startTile, endTile){
 }
 
 drawSpace.editTile = function (tileX, tileY){
+    if (tileX>=levelSize.x || tileY>=levelSize.y) return;
     if (selected.collisionMode){
         collisionLevelArray[tileY][tileX] = 1;
     }
