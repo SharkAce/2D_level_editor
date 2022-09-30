@@ -289,7 +289,7 @@ function startEditor(){
     collisionLevelArray = initCollisionArray();
     let myp5 = new p5(s);
 
-    parseLevelFile(levelFileReader.result)
+    if (levelFileReader.result != null)parseLevelFile(levelFileReader.result)
     document.getElementById("initForm").remove();
   
 };
