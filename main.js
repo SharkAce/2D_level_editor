@@ -70,11 +70,11 @@ const s = ( p ) => {
       drawSelectTiles(p);
       drawSelectRect(p);
       drawSpace.editLevelSingle(p);
-      drawGrid(p);
       drawEditedLevel(p,bgLevelArray);
       drawEditedLevel(p,fgLevelArray);
       drawCollisions(p);
       drawInfo(p);
+      drawGrid(p);
     };
 
     p.preload = function() {
@@ -340,11 +340,15 @@ function drawGrid(p){
 
     for (let i=0; i<=levelSize.y; i++){
         let y = i*(drawSpace.tileSize)
+        if (Math.floor(levelSize.y/2) == i) p.strokeWeight(2.5);
         p.line(selector.width,y,p.displayWidth,y);
+        p.strokeWeight(1);
     };
     for (let i=0; i<=levelSize.x; i++){
         let x = (i*(drawSpace.tileSize))+selector.width;
+        if (Math.floor(levelSize.x/2) == i) p.strokeWeight(2.8);
         p.line(x,0,x,p.displayHeight);
+        p.strokeWeight(1);
     };
     p.rect(selector.width,levelSize.y*drawSpace.tileSize,p.displayWidth,p.displayHeight);
 };
