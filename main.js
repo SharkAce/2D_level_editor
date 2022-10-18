@@ -58,8 +58,8 @@ const s = ( p ) => {
 
       drawSpace.tileSize = ((p.displayWidth-selector.width)/levelSize.x);
 
-      selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,255);
-      drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,255);
+      selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,288);
+      drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,288);
 
     };
   
@@ -355,9 +355,8 @@ function drawGrid(p){
 
 function drawSelectTiles(p){
     let i=0;
-    //spriteSheet width and height might be reversed, needs further testing
     for (let y=0;y<(selector.spriteArray.length/(spriteSheet.width/spriteSize));y++){
-        for (let x=0;x<(spriteSheet.height/spriteSize);x++){
+        for (let x=0;x<(spriteSheet.width/spriteSize);x++){
             p.image(selector.spriteArray[i],x*selector.tileSize,y*selector.tileSize);
             i++;
         };
