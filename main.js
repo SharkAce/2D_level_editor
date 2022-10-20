@@ -135,6 +135,8 @@ drawSpace.click = function(p){
     let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
     let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
 
+    if (!p.keyIsDown(p.CONTROL)) drawSpace.multiSelectedPos = [];
+
     if (selected.isMulti){
         drawSpace.editLevelSelectedMulti(tileX,tileY);
 
