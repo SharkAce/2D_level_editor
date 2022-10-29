@@ -98,6 +98,7 @@ const s = ( p ) => {
 };
 
 selector.click = function(p){
+		if (p.mouseY/selector.tileSize > spriteSheet.height/spriteSize) return;
     let tileX = Math.floor(p.mouseX / selector.tileSize);
     let tileY = Math.floor(p.mouseY / selector.tileSize);
     selected.fg = p.keyIsDown(p.SHIFT);
@@ -107,18 +108,24 @@ selector.click = function(p){
         selector.multiSelectedPos.push(new Point(tileX,tileY));
         if (selector.multiSelectedPos.length == 2){
 
-            let startPt = selector.multiSelectedPos[0];
-            let endPt = selector.multiSelectedPos[1];
+            let tile1 = selector.multiSelectedPos[0];
+            let tile2 = selector.multiSelectedPos[1];
+
+						let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
+						let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
+
+						let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
+						let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
 
             selector.multiSelectedPos = [];
             selected.multiSelectedIds = [];
             selected.isMulti = true;
-            selected.multiSelectedWidth = endPt.x - startPt.x;
-            selected.multiSelectedHeight = endPt.y - startPt.y;
+            selected.multiSelectedWidth = x2 - x1;
+            selected.multiSelectedHeight = y2 - y1;
 
 
-            for (let i=startPt.x; i<=endPt.x; i++){
-                for (let j=startPt.y; j<=endPt.y; j++){
+            for (let i=x1; i<=x2; i++){
+                for (let j=y1; j<=y2; j++){
                 selected.multiSelectedIds.push(j*(spriteSheet.width/spriteSize) + i)
                 };
             };
@@ -397,12 +404,18 @@ drawSpace.editLevelSingle = function (p){
 
 };
 
-drawSpace.editLevelMulti = function (startTile, endTile){
+drawSpace.editLevelMulti = function (tile1, tile2){
     //might implement support for both multi select in both selector and drawSpace at the same time later
     if (selected.isMulti) return;
 
-    for (let i=startTile.x; i<=endTile.x; i++){
-        for(let j=startTile.y; j<=endTile.y; j++){
+		let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
+		let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
+
+		let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
+		let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
+
+    for (let i=x1; i<=x2; i++){
+        for(let j=y1; j<=y2; j++){
             drawSpace.editTile(i,j);
         }
     }
