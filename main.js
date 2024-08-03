@@ -53,28 +53,28 @@ class Point {
 const s = ( p ) => {
 
     p.setup = function() {
-      p.createCanvas(p.displayWidth, p.displayHeight);
-      p.angleMode(p.DEGREES);
+        p.createCanvas(p.displayWidth, p.displayHeight);
+        p.angleMode(p.DEGREES);
 
-      drawSpace.tileSize = ((p.displayWidth-selector.width)/levelSize.x);
+        drawSpace.tileSize = ((p.displayWidth-selector.width)/levelSize.x);
 
-      selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,288);
-      drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,288);
+        selector.spriteArray = loadSpriteArray(spriteSheet,selector.tileSize,255,288);
+        drawSpace.spriteArray = loadSpriteArray(spriteSheet,drawSpace.tileSize,255,288);
 
     };
-  
+
     p.draw = function() {
-      p.background(120);
-      p.fill(255);
-      p.rect(0,0,selector.width,p.displayHeight);
-      drawSelectTiles(p);
-      drawSelectRect(p);
-      drawSpace.editLevelSingle(p);
-      drawEditedLevel(p,bgLevelArray);
-      drawEditedLevel(p,fgLevelArray);
-      drawCollisions(p);
-      drawInfo(p);
-      drawGrid(p);
+        p.background(120);
+        p.fill(255);
+        p.rect(0,0,selector.width,p.displayHeight);
+        drawSelectTiles(p);
+        drawSelectRect(p);
+        drawSpace.editLevelSingle(p);
+        drawEditedLevel(p,bgLevelArray);
+        drawEditedLevel(p,fgLevelArray);
+        drawCollisions(p);
+        drawInfo(p);
+        drawGrid(p);
     };
 
     p.preload = function() {
@@ -87,128 +87,128 @@ const s = ( p ) => {
             selector.click(p);
         } else {
             drawSpace.click(p);
+        };
+
+        p.keyPressed = function() {
+            if (p.key === "s") exportFile();
+            else if (p.key === "r") selected.rotation = (selected.rotation == 3 ? 0 : selected.rotation + 1);
+            else if (p.key === "d") {selected.id = -1; selected.isMulti = false; selected.collisionMode = false;}
+            else if (p.key === "c") {selected.collisionMode = true; selected.isMulti = false;}
+        };
     };
 
-    p.keyPressed = function() {
-        if (p.key === "s") exportFile();
-        else if (p.key === "r") selected.rotation = (selected.rotation == 3 ? 0 : selected.rotation + 1);
-        else if (p.key === "d") {selected.id = -1; selected.isMulti = false; selected.collisionMode = false;}
-        else if (p.key === "c") {selected.collisionMode = true; selected.isMulti = false;}
-    };
-};
+    selector.click = function(p){
+        if (p.mouseY/selector.tileSize > spriteSheet.height/spriteSize) return;
+        let tileX = Math.floor(p.mouseX / selector.tileSize);
+        let tileY = Math.floor(p.mouseY / selector.tileSize);
+        selected.fg = p.keyIsDown(p.SHIFT);
+        selected.collisionMode = false;
 
-selector.click = function(p){
-		if (p.mouseY/selector.tileSize > spriteSheet.height/spriteSize) return;
-    let tileX = Math.floor(p.mouseX / selector.tileSize);
-    let tileY = Math.floor(p.mouseY / selector.tileSize);
-    selected.fg = p.keyIsDown(p.SHIFT);
-    selected.collisionMode = false;
+        if (p.keyIsDown(p.CONTROL)){
+            selector.multiSelectedPos.push(new Point(tileX,tileY));
+            if (selector.multiSelectedPos.length == 2){
 
-    if (p.keyIsDown(p.CONTROL)){
-        selector.multiSelectedPos.push(new Point(tileX,tileY));
-        if (selector.multiSelectedPos.length == 2){
+                let tile1 = selector.multiSelectedPos[0];
+                let tile2 = selector.multiSelectedPos[1];
 
-            let tile1 = selector.multiSelectedPos[0];
-            let tile2 = selector.multiSelectedPos[1];
+                let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
+                let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
 
-						let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
-						let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
+                let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
+                let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
 
-						let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
-						let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
-
-            selector.multiSelectedPos = [];
-            selected.multiSelectedIds = [];
-            selected.isMulti = true;
-            selected.multiSelectedWidth = x2 - x1;
-            selected.multiSelectedHeight = y2 - y1;
+                selector.multiSelectedPos = [];
+                selected.multiSelectedIds = [];
+                selected.isMulti = true;
+                selected.multiSelectedWidth = x2 - x1;
+                selected.multiSelectedHeight = y2 - y1;
 
 
-            for (let i=x1; i<=x2; i++){
-                for (let j=y1; j<=y2; j++){
-                selected.multiSelectedIds.push(j*(spriteSheet.width/spriteSize) + i)
+                for (let i=x1; i<=x2; i++){
+                    for (let j=y1; j<=y2; j++){
+                        selected.multiSelectedIds.push(j*(spriteSheet.width/spriteSize) + i)
+                    };
                 };
             };
-        };
-    } else {
-        selected.id = tileY*(spriteSheet.width/spriteSize) + tileX;
-        selector.multiSelectedPos = [];
-        selected.multiSelectedIds = [];
-        selected.isMulti = false;
-    }
-};
+        } else {
+            selected.id = tileY*(spriteSheet.width/spriteSize) + tileX;
+            selector.multiSelectedPos = [];
+            selected.multiSelectedIds = [];
+            selected.isMulti = false;
+        }
+    };
 
-drawSpace.click = function(p){
-    let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
-    let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
+    drawSpace.click = function(p){
+        let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
+        let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
 
-    if (!p.keyIsDown(p.CONTROL)) drawSpace.multiSelectedPos = [];
+        if (!p.keyIsDown(p.CONTROL)) drawSpace.multiSelectedPos = [];
 
-    if (selected.isMulti){
-        drawSpace.editLevelSelectedMulti(tileX,tileY);
+        if (selected.isMulti){
+            drawSpace.editLevelSelectedMulti(tileX,tileY);
 
-    }
+        }
 
-    else if (p.keyIsDown(p.CONTROL)){
-        drawSpace.multiSelectedPos.push(new Point(tileX,tileY));
-        if (drawSpace.multiSelectedPos.length == 2){
-            drawSpace.editLevelMulti(drawSpace.multiSelectedPos[0],drawSpace.multiSelectedPos[1]);
+        else if (p.keyIsDown(p.CONTROL)){
+            drawSpace.multiSelectedPos.push(new Point(tileX,tileY));
+            if (drawSpace.multiSelectedPos.length == 2){
+                drawSpace.editLevelMulti(drawSpace.multiSelectedPos[0],drawSpace.multiSelectedPos[1]);
+            };
         };
     };
-};
 };
 
 drawSpace.editLevelSelectedMulti = function (tileX,tileY){
     switch(selected.rotation){
 
-    case 0: {
-        let i=0;
-        for (let x=tileX; x<=tileX+selected.multiSelectedWidth; x++){
-            for (let y=tileY; y<=tileY+selected.multiSelectedHeight; y++){
-                selected.id = selected.multiSelectedIds[i];
-                drawSpace.editTile(x,y);
-                i++
+        case 0: {
+            let i=0;
+            for (let x=tileX; x<=tileX+selected.multiSelectedWidth; x++){
+                for (let y=tileY; y<=tileY+selected.multiSelectedHeight; y++){
+                    selected.id = selected.multiSelectedIds[i];
+                    drawSpace.editTile(x,y);
+                    i++
+                }
             }
+            drawSpace.multiSelectedPos = [];
+            break;
         }
-        drawSpace.multiSelectedPos = [];
-        break;
-    }
-    case 1: {
-        let i=0;
-        for (let y=tileY; y<=tileY+selected.multiSelectedWidth; y++){
-            for (let x=tileX+selected.multiSelectedHeight; x >=tileX; x--){
-                selected.id = selected.multiSelectedIds[i];
-                drawSpace.editTile(x,y);
-                i++
+        case 1: {
+            let i=0;
+            for (let y=tileY; y<=tileY+selected.multiSelectedWidth; y++){
+                for (let x=tileX+selected.multiSelectedHeight; x >=tileX; x--){
+                    selected.id = selected.multiSelectedIds[i];
+                    drawSpace.editTile(x,y);
+                    i++
+                }
             }
+            drawSpace.multiSelectedPos = [];
+            break;
         }
-        drawSpace.multiSelectedPos = [];
-        break;
-    }
-    case 2: {
-        let i=0;
-        for (let x=tileX+selected.multiSelectedWidth; x>=tileX; x--){
-            for (let y=tileY+selected.multiSelectedHeight; y>=tileY; y--){
-                selected.id = selected.multiSelectedIds[i];
-                drawSpace.editTile(x,y);
-                i++
+        case 2: {
+            let i=0;
+            for (let x=tileX+selected.multiSelectedWidth; x>=tileX; x--){
+                for (let y=tileY+selected.multiSelectedHeight; y>=tileY; y--){
+                    selected.id = selected.multiSelectedIds[i];
+                    drawSpace.editTile(x,y);
+                    i++
+                }
             }
+            drawSpace.multiSelectedPos = [];
+            break;
         }
-        drawSpace.multiSelectedPos = [];
-        break;
-    }
-    case 3: {
-        let i=0;
-        for (let y=tileY+selected.multiSelectedWidth; y>=tileY; y--){
-            for (let x=tileX; x <= tileX+selected.multiSelectedHeight; x++){
-                selected.id = selected.multiSelectedIds[i];
-                drawSpace.editTile(x,y);
-                i++
+        case 3: {
+            let i=0;
+            for (let y=tileY+selected.multiSelectedWidth; y>=tileY; y--){
+                for (let x=tileX; x <= tileX+selected.multiSelectedHeight; x++){
+                    selected.id = selected.multiSelectedIds[i];
+                    drawSpace.editTile(x,y);
+                    i++
+                }
             }
+            drawSpace.multiSelectedPos = [];
+            break;
         }
-        drawSpace.multiSelectedPos = [];
-        break;
-    }
 
     }
 };
@@ -230,7 +230,7 @@ function drawInfo(p){
 
 function exportFile(){
     let parsedData = `${levelSize.x},${levelSize.y}`;
-    
+
     parsedData += encodeLine(bgLevelArray, "id");
     parsedData += encodeLine(bgLevelArray, "rotation");
     parsedData += encodeLine(fgLevelArray, "id");
@@ -279,7 +279,7 @@ function parseLevelFile(levelFileStr){
         fgLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x].rotation = intArr[4][i];
         collisionLevelArray[Math.floor(i/levelSize.x)][i%levelSize.x] = intArr[5][i];
     }
-    
+
 };
 
 function updateLevelFile(){
@@ -296,11 +296,10 @@ function startEditor(){
     bgLevelArray = initLevelArray(-1);
     fgLevelArray = initLevelArray(-1);
     collisionLevelArray = initCollisionArray();
-    let myp5 = new p5(s);
 
     if (levelFileReader.result != null)parseLevelFile(levelFileReader.result)
     document.getElementById("initForm").remove();
-  
+
 };
 
 function loadURL(elementId){
@@ -396,7 +395,7 @@ function drawSelectRect(p){
 
 drawSpace.editLevelSingle = function (p){
     if (!(p.mouseIsPressed) || (p.mouseX < selector.width) || (p.keyIsDown(p.CONTROL)) || (selected.isMulti)) return;
-    
+
     let tileX = Math.floor((p.mouseX - selector.width) / drawSpace.tileSize);
     let tileY = Math.floor((p.mouseY) / drawSpace.tileSize);
 
@@ -408,11 +407,11 @@ drawSpace.editLevelMulti = function (tile1, tile2){
     //might implement support for both multi select in both selector and drawSpace at the same time later
     if (selected.isMulti) return;
 
-		let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
-		let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
+    let x1 = (tile1.x <= tile2.x ? tile1.x : tile2.x);
+    let x2 = (tile1.x >= tile2.x ? tile1.x : tile2.x);
 
-		let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
-		let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
+    let y1 = (tile1.y <= tile2.y ? tile1.y : tile2.y);
+    let y2 = (tile1.y >= tile2.y ? tile1.y : tile2.y);
 
     for (let i=x1; i<=x2; i++){
         for(let j=y1; j<=y2; j++){
